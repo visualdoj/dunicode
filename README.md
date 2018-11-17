@@ -9,7 +9,7 @@ The library is cross platform, it does not require any other libraries, does not
 
 ## Validation
 
-```
+```pascal
 var
   S: AnsiString;
 
@@ -28,7 +28,7 @@ See [dutf8.pas](dutf8.pas) for detailed documentation for `ValidateUTF8`.
 
 Here is an example of general iteration over code points in UTF-8 string:
 
-```
+```pascal
 var
   S: AnsiString;
   Cursor, CursorEnd: PAnsiChar;
@@ -59,7 +59,7 @@ See [dutf8.pas](dutf8.pas) for detailed documentation for mentioned functions.
 
 If a string may contain the BOM, use SkipUTF8BOM to detect or skip it:
 
-```
+```pascal
 var
   S: AnsiString;
   Cursor, CursorEnd: PAnsiChar;
@@ -81,7 +81,7 @@ See [dutf8.pas](dutf8.pas) for detailed documentation for `SkipUTF8BOM`.
 
 Sometimes it is good idea to remove all invalid data from a string and make valid UTF-8 string. Use `FixUTF8` function for that:
 
-```
+```pascal
 procedure FixUTF8String(var S: AnsiString);
 var
   SEnd: PAnsiChar;
@@ -105,7 +105,7 @@ See [dutf8.pas](dutf8.pas) for detailed documentation for `FixUTF8`.
 
 Use `EncodeUTF8Char` function to encode a Unicode code point:
 
-```
+```pascal
 var
   U: Cardinal;
   Buffer, BufferEnd: PAnsiChar;
