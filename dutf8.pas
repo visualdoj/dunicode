@@ -83,9 +83,9 @@ const
 function DecodeUTF8Char(var Cursor: PAnsiChar; CursorEnd: PAnsiChar; out U: Cardinal): Boolean;
 function DecodeUTF8Char(var Cursor: PAnsiChar; var Size: SizeInt; out U: Cardinal): Boolean; inline;
 function DecodeUTF8CharIgnore(var Cursor: PAnsiChar; CursorEnd: PAnsiChar; out U: Cardinal): Boolean; inline;
-function DecodeUTF8CharIgnore(var Cursor: PAnsiChar; Size: SizeInt; out U: Cardinal): Boolean; inline;
+function DecodeUTF8CharIgnore(var Cursor: PAnsiChar; var Size: SizeInt; out U: Cardinal): Boolean; inline;
 function DecodeUTF8CharReplace(var Cursor: PAnsiChar; CursorEnd: PAnsiChar; out U: Cardinal; Replacement: Cardinal = Ord('?')): Boolean; inline;
-function DecodeUTF8CharReplace(var Cursor: PAnsiChar; Size: SizeInt; out U: Cardinal; Replacement: Cardinal = Ord('?')): Boolean; inline;
+function DecodeUTF8CharReplace(var Cursor: PAnsiChar; var Size: SizeInt; out U: Cardinal; Replacement: Cardinal = Ord('?')): Boolean; inline;
 
 //
 //  DecodeUTF8CharUnsafe
@@ -134,7 +134,7 @@ function SkipUTF8BOM(var S: PAnsiChar; SEnd: PAnsiChar): Boolean; inline;
 //
 //  ScanUTF8
 //
-//      Searchs for character U in UTF-8 encoded string.
+//      Searchs for the character U in UTF-8 encoded string.
 //
 //      Optimized for the case when U is less than 128, which allows to search
 //      without full UTF-8 decoding.
@@ -353,7 +353,7 @@ begin
   Exit(False);
 end;
 
-function DecodeUTF8CharIgnore(var Cursor: PAnsiChar; Size: SizeInt; out U: Cardinal): Boolean;
+function DecodeUTF8CharIgnore(var Cursor: PAnsiChar; var Size: SizeInt; out U: Cardinal): Boolean;
 begin
   while Size > 0 do begin
     if DecodeUTF8Char(Cursor, Size, U) then
@@ -377,7 +377,7 @@ begin
     Exit(False);
 end;
 
-function DecodeUTF8CharReplace(var Cursor: PAnsiChar; Size: SizeInt; out U: Cardinal; Replacement: Cardinal = Ord('?')): Boolean;
+function DecodeUTF8CharReplace(var Cursor: PAnsiChar; var Size: SizeInt; out U: Cardinal; Replacement: Cardinal = Ord('?')): Boolean;
 begin
   if Size > 0 then begin
     if DecodeUTF8Char(Cursor, Size, U) then begin
