@@ -123,7 +123,7 @@ See [dutf8.pas](dutf8.pas) for detailed documentation for `EncodeUTF8Char`.
 
 ## Convert UTF-8 to UTF-16
 
-```
+```pascal
 uses
   dutf8,
   dutf16;
@@ -164,7 +164,7 @@ end;
 
 ## Convert UTF-16 to UTF-8
 
-```
+```pascal
 uses
   dutf8,
   dutf16;
