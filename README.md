@@ -158,7 +158,7 @@ begin
   WCursor := @Result[1];
   WCursorEnd := WCursor + Length(Result);
   while DecodeUTF8CharReplace(SCursor, SCursorEnd, U, Ord('?')) do
-    EncodeUTF16BEChar(U, WCursor, WCursorEnd);
+    EncodeUTF16Char(U, WCursor, WCursorEnd, BigEndian);
 end;
 ```
 
