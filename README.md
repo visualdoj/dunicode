@@ -49,7 +49,7 @@ end else begin
 end;
 ```
 
-There are two more handy functions for iterating with similar interface: `DecodeUTF8CharIgnore` ignores all invalid data, `DecodeUTF8CharReplace` returns specified character instead of stop on invalid data.
+As you can see the loop immediatly stops on invalid data. There are two more handy functions for iterating with similar interface: `DecodeUTF8CharIgnore` ignores all invalid data, `DecodeUTF8CharReplace` returns specified character instead of stop on invalid data.
 
 `DecodeUTF8CharUnsafe` works slightly faster than `DecodeUTF8Char`, but assumes input string is valid UTF-8 string.
 
@@ -120,3 +120,102 @@ end;
 ```
 
 See [dutf8.pas](dutf8.pas) for detailed documentation for `EncodeUTF8Char`.
+
+## Convert UTF-8 to UTF-16
+
+```
+uses
+  dutf8,
+  dutf16;
+
+...
+
+//
+//  Converts UTF-8 string to UTF-16BE (by default) or UTF-16LE.
+//
+//  Replaces all malformed data in S to '?'.
+//
+function ConvertUTF8ToUTF16(const S: AnsiString; BigEndian: Boolean = True): WideString;
+var
+  L: SizeUInt;
+  U: Cardinal;
+  SCursor, SCursorEnd: PAnsiChar;
+  WCursor, WCursorEnd: PWideChar;
+begin
+  // In the first pass determine the size of resulting string.
+  L := 0;
+  SCursor := @S[1];
+  SCursorEnd := SCursor + Length(S);
+  while DecodeUTF8CharReplace(SCursor, SCursorEnd, U, Ord('?')) do
+    Inc(L, GetUTF16CharSize(U));
+  // GetUTF16CharSize returns number of bytes.
+  // But we want to compute number of WideChars. SizeOf(WideChar) = 2.
+  L := L div 2;
+  // In the second pass encode resulting UTF-16 string.
+  SetLength(Result, L);
+  SCursor := @S[1];
+  SCursorEnd := SCursor + Length(S);
+  WCursor := @Result[1];
+  WCursorEnd := WCursor + Length(Result);
+  while DecodeUTF8CharReplace(SCursor, SCursorEnd, U, Ord('?')) do
+    EncodeUTF16BEChar(U, WCursor, WCursorEnd);
+end;
+```
+
+## Convert UTF-16 to UTF-8
+
+```
+uses
+  dutf8,
+  dutf16;
+
+...
+
+//
+//  Converts UTF-16 encoded string to UTF-8 encoded.
+//
+//  Tries to detect BOM to determine endian. If no BOM found,
+//  uses BigEndian (assumes UTF16-BE if the parameter ommited).
+//
+//  Replaces all malformed data in W to '?'.
+//
+function ConvertUTF16ToUTF8(const W: WideString; BigEndian: Boolean = True): AnsiString;
+var
+  L: SizeUInt;
+  U: Cardinal;
+  SCursor, SCursorEnd: PAnsiChar;
+  WCursor, WCursorEnd: PWideChar;
+begin
+  // From the RFC:
+  //
+  // >  All applications that process text with the "UTF-16" charset label MUST
+  // >  be able to read at least the first two octets of the text and be able
+  // >  to process those octets in order to determine the serialization order
+  // >  of the text. Applications that process text with the "UTF-16" charset
+  // >  label MUST NOT assume the serialization without first checking the
+  // >  first two octets to see if they are a big-endian BOM, a little-endian
+  // >  BOM, or not a BOM. All applications that process text with the "UTF-16"
+  // >  charset label MUST be able to interpret both big- endian and
+  // >  little-endian text.
+  L := 0;
+  WCursor := @W[1];
+  WCursorEnd := WCursor + Length(W);
+  case SkipUTF16BOM(WCursor, WCursorEnd) of
+    UTF16_LE: BigEndian := False;
+    UTF16_BE: BigEndian := True;
+    UTF16_NOBOM: ; // stay default
+  end;
+  // At the first pass determine the size of resulting string.
+  while DecodeUTF16CharReplace(WCursor, WCursorEnd, U, Ord('?'), BigEndian) do
+    Inc(L, GetUTF8CharSize(U));
+  // At the second pass encode resulting UTF-8 string.
+  SetLength(Result, L);
+  WCursor := @W[1];
+  WCursorEnd := WCursor + Length(W);
+  SCursor := @Result[1];
+  SCursorEnd := SCursor + Length(Result);
+  SkipUTF16BOM(WCursor, WCursorEnd);
+  while DecodeUTF16CharReplace(WCursor, WCursorEnd, U, Ord('?'), BigEndian) do
+    EncodeUTF8Char(U, SCursor, SCursorEnd);
+end;
+```

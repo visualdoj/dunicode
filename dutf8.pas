@@ -445,11 +445,11 @@ end;
 function _ScanMultiByteUTF8(S, SEnd: PAnsiChar; U: Cardinal; out Pos: PAnsiChar): Boolean; inline;
 var
   I: SizeInt;
-  Buf: array[0 .. 3] of AnsiChar;
+  Buf: array[0 .. UTF8_MAX_CHARACTER_SIZE - 1] of AnsiChar;
   P: PAnsiChar;
 begin
   P := @Buf[0];
-  if not EncodeUTF8Char(U, P, @Buf[3]) then begin
+  if not EncodeUTF8Char(U, P, @Buf[0] + UTF8_MAX_CHARACTER_SIZE) then begin
     Pos := nil;
     Exit(False);
   end;
@@ -465,42 +465,52 @@ begin
     end;
   end;
   2: begin
-    I := IndexWord(S^, (SEnd - S) shr 1, Word((@Buf[0])^));
-    if I <> -1 then begin
-      Pos := S + (I shl 1);
-      Exit(True);
-    end else begin
-      Pos := nil;
-      Exit(False);
-    end;
-  end;
-  3: begin
     while S < SEnd do begin
-      I := IndexWord(S^, (SEnd - S) shr 1, Word((@Buf[0])^));
+      I := IndexByte(S^, SEnd - S, Byte(Buf[0]));
       if I <> -1 then begin
-        Pos := S + (I shl 1);
-        if (Pos + 2 < SEnd) and (Pos[2] = Buf[2]) then
+        Pos := S + I;
+        if (Pos + 1 < SEnd) and (Pos[1] = Buf[1]) then
           Exit(True);
       end else begin
         Pos := nil;
         Exit(False);
       end;
-      Inc(S, I);
+      Inc(S, I + 1);
+    end;
+    Pos := nil;
+    Exit(False);
+  end;
+  3: begin
+    while S < SEnd do begin
+      I := IndexByte(S^, SEnd - S, Byte(Buf[0]));
+      if I <> -1 then begin
+        Pos := S + I;
+        if (Pos + 2 < SEnd) and (PWord(Pos + 1)^ = PWord(@Buf[1])^) then
+          Exit(True);
+      end else begin
+        Pos := nil;
+        Exit(False);
+      end;
+      Inc(S, I + 1);
     end;
     Pos := nil;
     Exit(False);
   end;
   4: begin
     while S < SEnd do begin
-      I := IndexDWord(S^, (SEnd - S) shr 2, Cardinal((@Buf[0])^));
+      I := IndexByte(S^, SEnd - S, Byte(Buf[0]));
       if I <> -1 then begin
-        Pos := S + (I shl 2);
-        Exit(True);
+        Pos := S + I;
+        if (Pos + 3 < SEnd) and (PDWord(Pos)^ = PDWord(@Buf[0])^) then
+          Exit(True);
       end else begin
         Pos := nil;
         Exit(False);
       end;
+      Inc(S, I + 1);
     end;
+    Pos := nil;
+    Exit(False);
   end;
   else
     Pos := nil;

@@ -5,7 +5,7 @@ help :
 	@echo make test: compute diff from canonical result
 	@echo make canonize: canonize test results
 
-PROGNAME := utf8
+PROGNAME := utf16
 ifeq (,$(wildcard Makefile.node))
   UNITS_DIR := ../..
 else
@@ -27,8 +27,8 @@ clean :
 	rm *.map *.ppu *.o *.s *.out $(PROGNAME)
 endif
 
-$(EXE_NAME) : $(UNITS_DIR)/dutf8.pas utf8.pas
-	$(FPC) $(FPC_OPTIONS) -FU. -Fu$(UNITS_DIR) utf8.pas
+$(EXE_NAME) : $(UNITS_DIR)/dutf16.pas utf16.pas
+	$(FPC) $(FPC_OPTIONS) -FU. -Fu$(UNITS_DIR) utf16.pas
 build : $(EXE_NAME);
 
 run : build

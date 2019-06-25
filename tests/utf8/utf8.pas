@@ -216,6 +216,18 @@ begin
   TestScan(Ord('З'));
   TestScan(0);
   TestScan(UTF8_MAX_CHARACTER);
+  // Multibyte characters
+  TestScan(4321);
+  TestScan(4323);
+  TestScan(3614);
+  TestScan(3619);
+  TestScan(4635);
+  TestScan(4845);
+  TestScan(10316);
+  TestScan(10241);
+  TestScan(10279);
+  TestScan(5819);
+  TestScan(5846);
 
   Close(F);
 end;
@@ -334,7 +346,7 @@ procedure TestFix(Src, Dst: AnsiString; U: Cardinal = $FFFFFF);
 var
   SrcCursor, SrcEnd, DstCursor, DstEnd: PAnsiChar;
 begin
-  UniqueString(Src); 
+  UniqueString(Src);
   SrcCursor := @Src[1];
   SrcEnd := @Src[1] + Length(Src);
   if U <> $FFFFFF then begin
